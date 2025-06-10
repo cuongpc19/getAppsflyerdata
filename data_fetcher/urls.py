@@ -1,0 +1,7 @@
+from django.urls import path
+from .views import GetCampaignByAppsflyerIDAPIView  # Import view
+
+urlpatterns = [
+    # API lấy trường campaign theo appsflyer_id
+    path('appflyerdata/<str:appsflyer_id>/campaign/', GetCampaignByAppsflyerIDAPIView.as_view(), name='get-campaign-by-id'),
+]

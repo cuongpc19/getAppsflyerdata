@@ -1,0 +1,40 @@
+# Bỏ qua file chứa API keys
+api_keys.py
+
+# Bỏ qua tất cả các file .txt
+*.txt
+
+# Bỏ qua thư mục môi trường ảo
+venv/
+process_data/
+# ----------- Các mục bỏ qua phổ biến khác cho Django/Python (nên có) -----------
+.tmp*
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+*egg-info/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Django
+db.sqlite3*
+media/
+static_collected/
+.env
+/local_settings.py
+*.log
+*.pot
+*.mo
+
+# IDEs
+.vscode/
+.idea/
+
+# Operating System files
+.DS_Store
+Thumbs.db
