@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-y^uqdpinl72(45qru4krg%a_6n@4cm^q^g-8zn^f^li%)e2i(k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['wood.aagamestudio.com']
 
 
 # Application definition
@@ -75,13 +75,23 @@ WSGI_APPLICATION = 'dreamyroom.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.mysql",
+        "HOST": '34.133.90.39',
+        "PORT": '3306',
+        "USER": 'root',
+        "PASSWORD": "t'164hkM}*{,-2Ka",
+        "NAME": "AppsflyerData",
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -123,6 +133,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://wood.aagamestudio.com",
+    "http://wood.aagamestudio.com", # Thêm cả http nếu bạn cũng truy cập bằng http
+    # Thêm các tên miền hoặc IP khác nếu có
+    # Ví dụ: "http://127.0.0.1:8000",
+    # "http://localhost:8000",
+]
 
 import os
 

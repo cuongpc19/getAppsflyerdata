@@ -10,8 +10,10 @@ from data_fetcher.models import Install_Data
 from django.utils import timezone
 from .api_keys import API_TOKEN
 import logging
+import sys
+sys.path.insert(0, '/home/mkt-en/wood_nood_data')
 logger = logging.getLogger('data_fetcher')
-
+from ...constants import app_id_lst
 
         
 # Hàm riêng biệt chứa logic lấy dữ liệu chính
@@ -45,9 +47,10 @@ def _perform_data_fetch(api_url, params, headers,app_id,report_type):
                     # Save to DB
                     dt_naive = datetime.strptime(item['Install Time'], "%Y-%m-%d %H:%M:%S")
                     install_time_aware = timezone.make_aware(dt_naive)
-                    if not Install_Data.objects.filter(appsflyer_id=item['AppsFlyer ID']).exists():
+                    if not Install_Data.objects.filter(app_id=app_id,appsflyer_id=item['AppsFlyer ID']).exists():
                         Install_Data.objects.create(
                             appsflyer_id=item['AppsFlyer ID'],
+                            app_id=app_id,
                             campaign_name=campaign,
                             media_source=media_source,
                             install_time=install_time_aware,
@@ -88,6 +91,12 @@ def array_to_file(array, file_path):
             file.write(f"{item}\n")
     print(f"Data saved to {file_path}")
 
+def get_name_by_appid(appid):
+    for app in app_id_lst:
+        if app['app_id'] == appid:
+            return app['name']
+    return None
+
 class Command(BaseCommand):
     help = 'Fetches data from an external API and processes it.'
     
@@ -95,23 +104,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.NOTICE('Starting data fetching process...'))
         
-        
-        start = date.today() - timedelta(days=1)
-        end = date.today() 
+        start = timezone.now().date() - timedelta(days=1)
+        end = timezone.now().date() 
     
         FROM_DATE = start.strftime("%Y-%m-%d")
         TO_DATE = end.strftime("%Y-%m-%d")
         logger.info('Starting data fetching process:' + FROM_DATE + ' to ' + TO_DATE)
-        app_id_lst = [
-        {
-            'app_id': 'id6742221896',
-            'platform': 'ios'
-        },
-        {
-            'app_id': 'com.abi.dream.unpacking',
-            'platform': 'android'
-        }
-    ]
+
         report_type = ['organic_installs_report','installs_report']
         params_appsflyer = {
             'from': FROM_DATE,
@@ -146,3 +145,17 @@ class Command(BaseCommand):
                     logger.info(f'An unexpected error occurred for app_id: {app_id} with report type: {report_t} - {str(e)}')
                 
         self.stdout.write(self.style.NOTICE('Data fetching process finished.'))
+
+        distinct_date = Install_Data.objects.values_list('install_date', flat=True).distinct()
+        list_date = list(distinct_date)
+
+        distinct_app = Install_Data.objects.values_list('app_id', flat=True).distinct()
+        # distinct_categories là một QuerySet. Để xem nó như một list Python:
+        list_app = list(distinct_app)
+        for app in list_app:
+           for date in list_date:
+                # Lấy các bản ghi cho ngày và nền tảng cụ thể
+                records = Install_Data.objects.filter(install_date=date, app_id=app)
+                count = records.count()
+                logger.info(f"Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
+
