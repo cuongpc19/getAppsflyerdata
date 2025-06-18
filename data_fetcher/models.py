@@ -19,3 +19,16 @@ class Install_Data(models.Model):
         indexes = [
             models.Index(fields=['app_id','appsflyer_id']),
         ]
+
+class Request_Data(models.Model):
+    appsflyer_id = models.CharField(max_length=255, null = False, unique=True)
+    app_id = models.CharField(max_length=255, null = True)
+    platform = models.CharField(max_length=50, null = True)
+    inserted_time =  models.DateTimeField(null=True)
+    is_get_data = models.IntegerField(default=0)
+    number_request = models.IntegerField(default=1)
+    class Meta:
+        indexes = [
+            models.Index(fields=['app_id','appsflyer_id']),
+            models.Index(fields=['is_get_data']),
+        ]

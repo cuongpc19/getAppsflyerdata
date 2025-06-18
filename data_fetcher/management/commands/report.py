@@ -6,7 +6,7 @@ import json, os
 from datetime import datetime,date, timedelta
 import pandas as pd
 from io import StringIO
-from data_fetcher.models import Install_Data
+from data_fetcher.models import Install_Data,Request_Data
 from django.utils import timezone
 from .api_keys import API_TOKEN
 import logging
@@ -43,12 +43,11 @@ class Command(BaseCommand):
         distinct_app = Install_Data.objects.values_list('app_id', flat=True).distinct()
         # distinct_categories là một QuerySet. Để xem nó như một list Python:
         list_app = list(distinct_app)
+       
+
         for app in list_app:
-           for date in list_date:
-                # Lấy các bản ghi cho ngày và nền tảng cụ thể
-                records = Install_Data.objects.filter(install_date=date, app_id=app)
-                count = records.count()
-                print(f"Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
-
-
+            # Request gui len
+            records = Request_Data.objects.filter(inserted_time__date=timezone.now().date(), app_id=app)
+            count = records.values('appsflyer_id').distinct().count()
+            print(f"All request  - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
         

@@ -6,7 +6,7 @@ import json, os
 from datetime import datetime,date, timedelta
 import pandas as pd
 from io import StringIO
-from data_fetcher.models import Install_Data
+from data_fetcher.models import Install_Data,Request_Data
 from django.utils import timezone
 from .api_keys import API_TOKEN
 import logging
@@ -59,6 +59,7 @@ def _perform_data_fetch(api_url, params, headers,app_id,report_type):
                             city=item['City'],
                             country=item['Country Code'],
                             device=item['Device Model'],
+                            inserted_time=timezone.now(),
                         )
             
             #filelocation = f'data_fetcher/management/commands/{app_id}_AID_{report_type}.txt'
@@ -159,3 +160,16 @@ class Command(BaseCommand):
                 count = records.count()
                 logger.info(f"Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
 
+        for app in list_app:
+           for date in list_date:
+               
+                # Moi ngay co bao nhieu request co appsflyerID duoc tra ve
+                records = Install_Data.objects.filter(install_date=date, app_id=app, is_get_data=True)
+                count = records.count()
+                logger.info(f"So luong request valid - Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
+
+        for app in list_app:
+            # Request gui len
+            records = Request_Data.objects.filter(inserted_time__date=timezone.now().date(), app_id=app)
+            count = records.values('appsflyer_id').distinct().count()
+            logger.info(f"All request  - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")

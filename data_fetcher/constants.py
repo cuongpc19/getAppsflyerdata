@@ -18,6 +18,16 @@ app_id_lst = [
             'app_id': 'com.abi.dream.unpacking',
             'platform': 'android',
             'name':'dreamy'
+        },
+        {
+            'app_id': 'com.abi.woodout.screw.bar', #woodout
+            'platform': 'android',
+            'name':'woodout'
+        },
+        {
+            'app_id': 'id6499255999',
+            'platform': 'ios',
+            'name':'woodout'
         }
 ]
 

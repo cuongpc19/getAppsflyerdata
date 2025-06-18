@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Install_Data
+from .models import Install_Data, Request_Data
 from .serializers import DataInstallSerializer # <-- Import serializer mới
 from .constants import app_id_lst
+from django.utils import timezone
 
 class GetCampaignByAppsflyerIDAPIView(APIView):
     """
@@ -32,13 +33,36 @@ class GetCampaignByAppsflyerIDAPIView(APIView):
                 app_id=app_info['app_id'],  # Sử dụng app_id từ danh sách
                 appsflyer_id=appsflyer_id    # Và appflyerID phải khớp
             ).first()
-
+            
+            #luu thong tin request
+            obj_request = Request_Data.objects.filter(
+                app_id=app_info['app_id'],  # Sử dụng app_id từ danh sách
+                appsflyer_id=appsflyer_id    # Và appflyerID phải khớp
+            ).first()
+            if not obj_request:
+                obj_request = Request_Data.objects.create(
+                    appsflyer_id=appsflyer_id,
+                    app_id=app_info['app_id'],
+                    inserted_time=timezone.now(),
+                    #platform=platform_id,
+                    platform=platform_id,
+                    is_get_data=0,
+                )
+            else:
+                obj_request.number_request += 1
+                obj_request.inserted_time=timezone.now()
+                obj_request.save()
 
         if not obj:
             return Response(
                 {"error": "Không tìm thấy dữ liệu cho appsflyerID này."},
                 status=status.HTTP_404_NOT_FOUND
             )
+        else:
+            obj.is_get_data = True
+            obj.save()
+            obj_request.is_get_data = True
+            obj_request.save()
         # 2. Chuyển đổi đối tượng bằng DataInstallSerializer
         serializer = DataInstallSerializer(obj)
 
