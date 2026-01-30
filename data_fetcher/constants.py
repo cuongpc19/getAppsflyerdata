@@ -28,6 +28,16 @@ app_id_lst = [
             'app_id': 'id6499255999',
             'platform': 'ios',
             'name':'woodout'
+        },
+        {
+            'app_id': 'com.abi.skewer.sort', #foodie
+            'platform': 'android',
+            'name':'foodie'
+        },
+        {
+            'app_id': 'id6746246179',
+            'platform': 'ios',
+            'name':'foodie'
         }
 ]
 

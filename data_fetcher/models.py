@@ -14,10 +14,12 @@ class Install_Data(models.Model):
     media_source = models.CharField(max_length=255, null = True)
     inserted_time =  models.DateTimeField(null=True)
     is_get_data = models.IntegerField(default=0)
+    reporttype = models.CharField(max_length=255, null = True)
     
     class Meta:
         indexes = [
             models.Index(fields=['app_id','appsflyer_id']),
+            models.Index(fields=['reporttype']),
         ]
 
 class Request_Data(models.Model):

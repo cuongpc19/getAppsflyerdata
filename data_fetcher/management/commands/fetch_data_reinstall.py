@@ -37,16 +37,10 @@ def _perform_data_fetch(api_url, params, headers,app_id,report_type):
             for chunk in pd.read_csv(StringIO(res_appsflyer.text), usecols=columns_to_keep, chunksize=batch_size, keep_default_na=False):
                 chunk.replace('', None, inplace=True)
                 for _, item in chunk.iterrows():
-                    if report_type == 'organic_installs_report':
+                    if report_type == 'reinstalls_organic':
                         campaign = 'Organic'
                         media_source = 'Organic'
-                    elif report_type == 'installs_report':
-                        campaign = item['Campaign']
-                        media_source = item['Media Source']
-                    elif report_type == 'reinstalls_organic':
-                        campaign = 'Organic'
-                        media_source = 'Organic'
-                    elif report_type == 'reinstalls':
+                    else:
                         campaign = item['Campaign']
                         media_source = item['Media Source']
                     #install_data_list.append(item['AppsFlyer ID'] + ',' + campaign+ ','  + media_source + ',' + item['Install Time']+ ',' + item['Platform']+ ',' + item['City']+ ',' + item['Country Code']+ ',' + item['Device Model'])
@@ -112,15 +106,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write(self.style.NOTICE('Starting data fetching process...'))
         
-        start = timezone.now().date() - timedelta(days=1)
-        end = timezone.now().date() 
-
-
+        start = timezone.now().date() - timedelta(days=18)
+        end = timezone.now().date() - timedelta(days=13)
+    
         FROM_DATE = start.strftime("%Y-%m-%d")
         TO_DATE = end.strftime("%Y-%m-%d")
         logger.info('Starting data fetching process:' + FROM_DATE + ' to ' + TO_DATE)
 
-        report_type = ['organic_installs_report','installs_report','reinstalls_organic','reinstalls']
+        report_type = ['reinstalls_organic','reinstalls']
         params_appsflyer = {
             'from': FROM_DATE,
             'to': TO_DATE,
@@ -132,7 +125,7 @@ class Command(BaseCommand):
             "authorization": ("Bearer " + str(API_TOKEN)).replace("\'","")
         }
         #xoa du lieu cu
-        seven_days_ago = timezone.now().date() - timedelta(days=7)
+        seven_days_ago = timezone.now().date() - timedelta(days=27)
         Install_Data.objects.filter(install_date__lt=seven_days_ago).delete()
         for report_t in report_type:
             for app in app_id_lst:
@@ -180,15 +173,15 @@ class Command(BaseCommand):
             # Request gui len
             records = Request_Data.objects.filter(inserted_time__date=timezone.now().date(), app_id=app)
             count = records.values('appsflyer_id').distinct().count()
-            logger.info(f"All request  - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
+            logger.info(f"All request  - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi : {count}")
 
         for app in list_app:
             # Report reinstall
             for date in list_date:
                 records = Install_Data.objects.filter(install_date=date, app_id=app, reporttype='reinstalls')
                 count = records.values('appsflyer_id').distinct().count()
-                logger.info(f"Reinstall - Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi reinstall : {count}")
+                logger.info(f"Reinstall - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi reinstall : {count}")
 
                 records = Install_Data.objects.filter(install_date=date, app_id=app, reporttype='reinstalls_organic')
                 count = records.values('appsflyer_id').distinct().count()
-                logger.info(f"Reinstall - Ngày: {date}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi reinstalls_organic : {count}")
+                logger.info(f"Reinstall - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi reinstalls_organic : {count}")

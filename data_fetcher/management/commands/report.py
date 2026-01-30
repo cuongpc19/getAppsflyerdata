@@ -37,17 +37,18 @@ class Command(BaseCommand):
     help = 'Reporting.'
     
     def handle(self, *args, **options):
-        distinct_date = Install_Data.objects.values_list('install_date', flat=True).distinct()
-        list_date = list(distinct_date)
+        qs = Install_Data.objects.filter(
+            app_id='id6742221896',  # dreamy
+            install_date=date.today() - timedelta(days=1),
+        
+        ).order_by('-id').values()[:3]  # Lấy 3 dòng đầu tiên
 
-        distinct_app = Install_Data.objects.values_list('app_id', flat=True).distinct()
-        # distinct_categories là một QuerySet. Để xem nó như một list Python:
-        list_app = list(distinct_app)
-       
+        for row in qs:
+            print(row)
 
-        for app in list_app:
-            # Request gui len
-            records = Request_Data.objects.filter(inserted_time__date=timezone.now().date(), app_id=app)
-            count = records.values('appsflyer_id').distinct().count()
-            print(f"All request  - Ngày: {timezone.now().date()}, AppID: {app}, App: {get_name_by_appid(app)} Số lượng bản ghi: {count}")
+        
+
+        
+  
+        
         
