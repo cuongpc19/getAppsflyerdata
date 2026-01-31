@@ -6,7 +6,7 @@ import json, os
 from datetime import datetime,date, timedelta
 import pandas as pd
 from io import StringIO
-from data_fetcher.models import Install_Data,Request_Data
+from data_fetcher.models import Install_Data, Install_DataPush,Request_Data
 from django.utils import timezone
 from .api_keys import API_TOKEN
 import logging
@@ -37,11 +37,9 @@ class Command(BaseCommand):
     help = 'Reporting.'
     
     def handle(self, *args, **options):
-        qs = Install_Data.objects.filter(
-            app_id='id6742221896',  # dreamy
-            install_date=date.today() - timedelta(days=1),
-        
-        ).order_by('-id').values()[:3]  # Lấy 3 dòng đầu tiên
+        qs = Install_DataPush.objects.filter(
+            app_id='com.abi.dream.unpacking'
+        ).order_by('-id').values()[:7]  # Lấy 3 dòng đầu tiên
 
         for row in qs:
             print(row)

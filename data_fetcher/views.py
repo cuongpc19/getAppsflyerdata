@@ -1,12 +1,15 @@
 # myapp/views.py
+from datetime import datetime
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from .models import Install_Data, Request_Data
+from .models import Install_Data, Install_DataPush, Request_Data
 from .serializers import DataInstallSerializer # <-- Import serializer mới
 from .constants import app_id_lst
 from django.utils import timezone
+import logging
+logger = logging.getLogger('appsflyer_push')
 
 class GetCampaignByAppsflyerIDAPIView(APIView):
     """
@@ -69,4 +72,48 @@ class GetCampaignByAppsflyerIDAPIView(APIView):
         # 3. Trả về Response cho client
         # serializer.data sẽ chỉ chứa {'campaign': 'Giá trị của campaign'}
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+class GetDataPullByAppsflyerView(APIView):
+    def post(self, request):
+        data = request.data
+        # Xử lý dữ liệu nhận từ Appsflyer ở đây
+        
+        appsflyer_id = data.get('appsflyer_id')
+        app_id = data.get('app_id')
+        campaign = data.get('campaign')
+        if campaign is None:
+            campaign = data.get('media_source')
+        #logger.info(f"Appsflyer PUSH DATA appsflyer_id: {data.get('appsflyer_id')}, app_id: {app_id}, campaign: {campaign}, media_source: {data.get('media_source')}, install_time: {data.get('install_time')}, platform: {data.get('platform')}, city: {data.get('city')}, country: {data.get('country')}, device: {data.get('device')}, event_name: {data.get('event_name')}")
+        if not appsflyer_id or not app_id:
+            return Response({"error": "Missing appsflyer_id or app_id"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            dt_naive = datetime.strptime(data.get('install_time'), "%Y-%m-%d %H:%M:%S")
+            install_time_aware = timezone.make_aware(dt_naive)
+            install_date_aware = dt_naive.date()
+        except (TypeError, ValueError):
+            # Nếu lỗi, lấy thời gian hiện tại làm mặc định
+            install_time_aware = timezone.now()
+            install_date_aware = timezone.now().date()
+            
+        #logger.info(f"Data saved successfully with install_time_aware: {install_time_aware}, install_date_aware: {install_date_aware}")
+
+        if not Install_DataPush.objects.filter(app_id=app_id,appsflyer_id=appsflyer_id).exists():
+            obj=Install_DataPush.objects.create(
+                appsflyer_id=appsflyer_id,
+                app_id=app_id,
+                campaign_name=campaign,
+                media_source=data.get('media_source'),
+                install_time=install_time_aware,
+                install_date=install_date_aware,
+                platform=data.get('platform'),
+                city=data.get('city'),
+                country=data.get('country'),
+                device=data.get('device'),
+                inserted_time=timezone.now(),
+                reporttype=data.get('event_name'),
+            )
+        
+            
+        
+        return Response({"message": "Data received "}, status=status.HTTP_201_CREATED)

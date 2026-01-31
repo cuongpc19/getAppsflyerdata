@@ -165,6 +165,13 @@ LOGGING = {
             'formatter': 'verbose',
             'encoding': 'utf-8',
         },
+        'appsflyer_push_file': {  # Thêm handler mới
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'appsflyer_push.log'),
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
@@ -173,6 +180,11 @@ LOGGING = {
     'loggers': {
         'data_fetcher': {
             'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'appsflyer_push': {  # Logger cho appsflyer push
+            'handlers': ['appsflyer_push_file', 'console'],
             'level': 'INFO',
             'propagate': False,
         },
