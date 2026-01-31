@@ -13,6 +13,7 @@ import logging
 logger = logging.getLogger('data_fetcher')
 from ...constants import app_id_lst
 
+
 def get_app_id_by_platform_and_name(platform, name):
     """
     Tìm và trả về app_id từ APP_INFO_LIST dựa trên platform và tên game.
@@ -38,11 +39,15 @@ class Command(BaseCommand):
     
     def handle(self, *args, **options):
         qs = Install_DataPush.objects.filter(
-            app_id='com.abi.dream.unpacking'
-        ).order_by('-id').values()[:7]  # Lấy 3 dòng đầu tiên
+            appsflyer_id__in=Install_Data.objects.values("appsflyer_id")
+        )
 
-        for row in qs:
-            print(row)
+        for a in qs:
+            b = Install_Data.objects.get(appsflyer_id=a.appsflyer_id)
+            print("appsflyerID:", a.appsflyer_id, "campaign_name:", a.campaign_name, "--", b.campaign_name)
+
+
+    
 
         
 
